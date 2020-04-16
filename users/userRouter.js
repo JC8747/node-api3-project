@@ -16,23 +16,16 @@ router.post("/", validateUser(), (req, res, next) => {
     });
 });
 
-router.post(
-  "/:id/posts",
-  validateUserId(),
-  validatePost(),
-  (req, res, next) => {
-    const { text } = req.body;
-    const { id: user_id } = req.params;
-    posts
-      .insert({ text, user_id })
-      .then(user => {
-        res.status(200).json(user);
-      })
-      .catch(error => {
-        next(error);
-      });
-  }
-);
+router.post("/:id/posts", validateUserId, validatePost, (req, res, next) => {
+  posts
+    .insert({ ...req.body, user_id: req.id })
+    .then((post) => {
+      res.status(201).json(post);
+    })
+    .catch((err) => {
+      next(err);
+    });
+});
 
 router.get("/", (req, res, next) => {
   console.log("req.query", req.query);
