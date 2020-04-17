@@ -8,7 +8,6 @@ module.exports = format => {
 	  } else {
 		console.log(`${ip} ${method} ${url} ${agent}`);
 	  }
-
 	  next();
 	};
   };

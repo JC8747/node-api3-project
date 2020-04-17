@@ -1,7 +1,5 @@
 const express = require("express");
-
 const router = express.Router();
-
 const users = require("./userDb");
 const posts = require("../posts/postDb");
 
@@ -16,16 +14,23 @@ router.post("/", validateUser(), (req, res, next) => {
     });
 });
 
-router.post("/:id/posts", validateUserId, validatePost, (req, res, next) => {
-  posts
-    .insert({ ...req.body, user_id: req.id })
-    .then((post) => {
-      res.status(201).json(post);
-    })
-    .catch((err) => {
-      next(err);
-    });
-});
+router.post(
+  "/:id/posts",
+  validateUserId(),
+  validatePost(),
+  (req, res, next) => {
+    const { text } = req.body;
+    const { id: user_id } = req.params;
+    posts
+      .insert({ text, user_id })
+      .then(user => {
+        res.status(200).json(user);
+      })
+      .catch(error => {
+        next(error);
+      });
+  }
+);
 
 router.get("/", (req, res, next) => {
   console.log("req.query", req.query);
@@ -84,7 +89,7 @@ function validateUserId(req, res, next) {
           req.user = user;
           next();
         } else {
-          res.status(404).json({ message: "User ID invalid" });
+          res.status(404).json({ message: "invalid user id" });
         }
       })
       .catch(error => {
@@ -96,9 +101,9 @@ function validateUserId(req, res, next) {
 function validateUser(req, res, next) {
   return (req, res, next) => {
     if (!req.body) {
-      return res.status(400).json({ message: "User data not found" });
+      return res.status(400).json({ message: "missing user data" });
     } else if (!req.body.name) {
-      return res.status(400).json({ message: "Required name not found" });
+      return res.status(400).json({ message: "missing required name field" });
     }
     next();
   };
@@ -107,9 +112,9 @@ function validateUser(req, res, next) {
 function validatePost(req, res, next) {
   return (req, res, next) => {
     if (!req.body) {
-      return res.status(400).json({ message: "Post data not found" });
+      return res.status(400).json({ message: "missing post data" });
     } else if (!req.body.text) {
-      return res.status(400).json({ message: "Required text not found" });
+      return res.status(400).json({ message: "missing required text field" });
     }
     next();
   };
